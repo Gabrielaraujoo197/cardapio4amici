@@ -526,6 +526,26 @@
       font-weight: 700;
     }
 
+  
+
+    /* Navegação em modo aplicativo: mostra apenas a categoria selecionada */
+    body.menu-app-mode .menu-shell > .hero,
+    body.menu-app-mode .menu-shell > section {
+      display: none;
+    }
+
+    body.menu-app-mode .menu-shell > section.menu-active-screen {
+      display: block;
+      min-height: calc(100vh - 52px);
+    }
+
+    .nav a.menu-active-link {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+      box-shadow: 0 8px 18px rgba(74, 124, 69, .22);
+    }
+
   </style>
 </head>
 <body>
@@ -937,5 +957,84 @@
 <div class="contact-row"><span>Horário</span><span>18h às 00h</span></div>
 <div class="contact-row"><span>Delivery</span><span>iFood e 99Food</span></div>
 </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const idsDasTelas = [
+        'marca',
+        'entradas',
+        'massas',
+        'individuais',
+        'tradicionais',
+        'especiais',
+        'vegetarianas',
+        'doces',
+        'sobremesas',
+        'bebidas',
+        'combos',
+        'adicionais',
+        'pedido'
+      ];
+
+      const telas = idsDasTelas
+        .map(function (id) { return document.getElementById(id); })
+        .filter(Boolean);
+
+      const links = Array.from(document.querySelectorAll('a[href^="#"]'));
+      const nav = document.querySelector('.nav');
+
+      function limparAtivos() {
+        telas.forEach(function (tela) {
+          tela.classList.remove('menu-active-screen');
+        });
+
+        links.forEach(function (link) {
+          link.classList.remove('menu-active-link');
+        });
+      }
+
+      function mostrarTela(id, atualizarUrl) {
+        const tela = document.getElementById(id);
+        if (!tela || !idsDasTelas.includes(id)) return;
+
+        document.body.classList.add('menu-app-mode');
+        limparAtivos();
+        tela.classList.add('menu-active-screen');
+
+        links.forEach(function (link) {
+          if (link.getAttribute('href') === '#' + id) {
+            link.classList.add('menu-active-link');
+          }
+        });
+
+        if (atualizarUrl) {
+          history.replaceState(null, '', '#' + id);
+        }
+
+        const destino = nav ? nav.offsetTop : 0;
+        window.scrollTo({ top: destino, behavior: 'smooth' });
+      }
+
+      links.forEach(function (link) {
+        const href = link.getAttribute('href') || '';
+        if (!href.startsWith('#')) return;
+
+        const id = href.slice(1);
+        if (!idsDasTelas.includes(id)) return;
+
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          mostrarTela(id, true);
+        });
+      });
+
+      const hashInicial = window.location.hash ? window.location.hash.slice(1) : '';
+      if (idsDasTelas.includes(hashInicial)) {
+        mostrarTela(hashInicial, false);
+      }
+    });
+  </script>
+
 </body>
 </html>
